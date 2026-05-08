@@ -12,7 +12,6 @@
             --nav-bg: #ffffff;
             --line-height: 2.2;
             --font-size: 22px;
-            --rt-display: block; /* 控制注音顯示 */
         }
 
         body.dark-mode {
@@ -27,17 +26,18 @@
             color: var(--text-color);
             line-height: var(--line-height);
             font-size: var(--font-size);
-            font-family: serif;
+            /* 恢復系統字體，不再指定新細明體 */
+            font-family: system-ui, -apple-system, sans-serif; 
             margin: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
-            transition: 0.3s;
-            /* 預設開啟選取功能，但優化選取體驗 */
+            transition: background-color 0.3s;
             user-select: text;
             -webkit-user-select: text;
         }
 
+        /* 導覽列 */
         .nav-wrapper {
             position: sticky;
             top: 0;
@@ -58,7 +58,7 @@
             transition: max-height 0.3s ease-out;
         }
 
-        .controls.collapsed { max-height: 0; padding: 0; }
+        .controls.collapsed { max-height: 0; padding: 0; border: none; }
 
         .toggle-btn {
             width: 100%;
@@ -89,25 +89,32 @@
         body.dark-mode button { background: #333; color: #fff; border-color: #555; }
         button.active { background: #8e44ad !important; color: #fff !important; }
 
+        /* 經文區塊優化 */
         #content {
             max-width: 800px;
             width: 90%;
             padding: 20px 10px;
             word-break: break-all;
+            /* 減少選取時的渲染 Lag */
+            contain: content; 
         }
 
-        ruby { ruby-align: center; }
-        /* 關鍵：透過 CSS 變數控制注音是否消失 */
+        /* 注音位置修正 */
+        ruby { 
+            ruby-align: center; 
+            ruby-position: over; /* 強制注音在上面 */
+        }
+        
         rt { 
-            display: var(--rt-display);
             color: var(--ruby-color); 
-            font-size: 0.45em; 
+            font-size: 0.45em;
+            line-height: 1;
+            /* 避免注音影響行高計算，減少 Lag */
+            user-select: none; 
         }
 
-        /* 當切換到複製模式時的樣式 */
-        body.copy-mode rt {
-            display: none;
-        }
+        /* 複製模式：隱藏注音 */
+        body.copy-mode rt { display: none; }
     </style>
 </head>
 <body>
@@ -116,7 +123,7 @@
     <div id="controlPanel" class="controls">
         <div class="btn-group">
             <button onclick="toggleDark()">🌙 黑色模式</button>
-            <button onclick="toggleCopyMode(this)">📋 開啟複製模式</button>
+            <button id="copyBtn" onclick="toggleCopyMode()">📋 開啟複製模式</button>
             <button onclick="adjLH(0.2)">➕ 行距</button>
             <button onclick="adjLH(-0.2)">➖ 行距</button>
             <button onclick="adjFS(2)">🅰️ 放大</button>
@@ -146,18 +153,12 @@
     function adjFS(v) { fs += v; document.body.style.setProperty('--font-size', fs + 'px'); }
     function toggleMenu() { document.getElementById('controlPanel').classList.toggle('collapsed'); }
 
-    // 切換複製模式的函式
-    function toggleCopyMode(btn) {
-        const isCopyMode = document.body.classList.toggle('copy-mode');
-        if (isCopyMode) {
-            btn.innerHTML = "✅ 複製模式 (已隱藏注音)";
-            btn.style.background = "#27ae60";
-            btn.style.color = "#fff";
-        } else {
-            btn.innerHTML = "📋 開啟複製模式";
-            btn.style.background = "";
-            btn.style.color = "";
-        }
+    function toggleCopyMode() {
+        const btn = document.getElementById('copyBtn');
+        const isCopy = document.body.classList.toggle('copy-mode');
+        btn.innerHTML = isCopy ? "✅ 退出複製模式" : "📋 開啟複製模式";
+        btn.style.background = isCopy ? "#27ae60" : "";
+        btn.style.color = isCopy ? "#fff" : "";
     }
 
     async function load(file, btn) {
@@ -186,3 +187,4 @@
 
 </body>
 </html>
+
