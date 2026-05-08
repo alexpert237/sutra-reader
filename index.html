@@ -112,3 +112,94 @@
 
 </body>
 </html>
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>法華經閱讀器</title>
+    <style>
+        :root {
+            --bg-color: #f9f7f2;
+            --text-color: #333;
+            --ruby-color: #2980b9;
+            --line-height: 2;
+        }
+
+        /* 深色模式變數 */
+        body.dark-mode {
+            --bg-color: #1a1a1a;
+            --text-color: #daffde;
+            --ruby-color: #deff9a;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: var(--line-height);
+            font-family: serif;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .controls {
+            position: sticky;
+            top: 0;
+            background: rgba(128,128,128,0.1);
+            padding: 10px;
+            backdrop-filter: blur(10px);
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            z-index: 100;
+        }
+
+        button { padding: 8px 12px; cursor: pointer; }
+        
+        #content { max-width: 800px; margin: 20px auto; }
+        ruby { ruby-align: center; }
+        rt { color: var(--ruby-color); font-size: 0.5em; }
+    </style>
+</head>
+<body id="mainBody">
+
+<div class="controls">
+    <button onclick="toggleDarkMode()">🌙 黑色模式</button>
+    <button onclick="changeLineHeight(0.5)">➕ 加大行距</button>
+    <button onclick="changeLineHeight(-0.5)">➖ 縮小行距</button>
+    <hr style="width:100%">
+    <button onclick="loadFile('妙法蓮華經卷第一.md')">卷一</button>
+    </div>
+
+<div id="content">載入中...</div>
+
+<script>
+    let currentLineHeight = 2.0;
+
+    function toggleDarkMode() {
+        document.body.classList.toggle('dark-mode');
+    }
+
+    function changeLineHeight(delta) {
+        currentLineHeight += delta;
+        if(currentLineHeight < 1.5) currentLineHeight = 1.5;
+        if(currentLineHeight > 4.0) currentLineHeight = 4.0;
+        document.body.style.setProperty('--line-height', currentLineHeight);
+    }
+
+    async function loadFile(name) {
+        const res = await fetch(name);
+        const text = await res.text();
+        // 格式轉換邏輯
+        const formatted = text.replace(/([一-龥])\(([^)]+)\)/g, '<ruby>$1<rt>$2</rt></ruby>');
+        document.getElementById('content').innerHTML = formatted.replace(/\n/g, '<br>');
+    }
+
+    window.onload = () => loadFile('妙法蓮華經卷第一.md');
+</script>
+</body>
+</html>
+
+您只需要把這段新代碼貼進您的 `index.html` 儲存，您的讀經網站就能一鍵變黑、並隨意調整行高了！
+
