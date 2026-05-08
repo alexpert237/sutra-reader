@@ -5,20 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>妙法蓮華經 - 數位閱讀器</title>
     <style>
-        /* 1. 設定變數，方便切換模式與行高 */
         :root {
             --bg-color: #f9f7f2;
             --text-color: #333;
             --ruby-color: #2980b9;
-            --nav-bg: #fff;
+            --nav-bg: #ffffff;
             --line-height: 2.2;
             --font-size: 22px;
         }
 
-        /* 黑色模式變數 */
+        /* 黑色模式 (深色主題) */
         body.dark-mode {
             --bg-color: #121212;
-            --text-color: #daffde; /* 淡淡的綠色文字，對眼睛最好 */
+            --text-color: #daffde; /* 淺綠色字，最適合長時間讀經 */
             --ruby-color: #deff9a; /* 亮色注音 */
             --nav-bg: #1a1a1a;
         }
@@ -28,28 +27,27 @@
             color: var(--text-color);
             line-height: var(--line-height);
             font-size: var(--font-size);
-            font-family: "Noto Serif TC", "Microsoft JhengHei", serif;
+            font-family: serif;
             margin: 0;
-            padding: 0;
-            transition: background-color 0.3s, color 0.3s;
             display: flex;
             flex-direction: column;
             align-items: center;
+            transition: 0.3s;
         }
 
-        /* 控制面板：固定在上方 */
+        /* 固定在頂部的控制列 */
         .controls {
             position: sticky;
             top: 0;
             width: 100%;
-            background-color: var(--nav-bg);
+            background: var(--nav-bg);
+            padding: 10px 0;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            padding: 10px;
-            z-index: 1000;
             display: flex;
             flex-direction: column;
             gap: 10px;
             align-items: center;
+            z-index: 100;
         }
 
         .btn-group {
@@ -60,138 +58,93 @@
         }
 
         button {
-            padding: 8px 12px;
+            padding: 6px 12px;
+            cursor: pointer;
             border: 1px solid #ccc;
             background: #fff;
-            cursor: pointer;
             border-radius: 4px;
-            font-size: 14px;
         }
 
         body.dark-mode button {
             background: #333;
             color: #fff;
-            border-color: #444;
+            border-color: #555;
         }
 
         button.active {
-            background: #8e44ad;
-            color: #fff;
+            background: #8e44ad !important;
+            color: #fff !important;
         }
 
-        /* 內容區 */
         #content {
             max-width: 800px;
             width: 90%;
-            padding: 40px 20px;
-            min-height: 80vh;
+            padding: 30px 10px;
         }
 
-        /* 注音標註 */
         ruby { ruby-align: center; }
-        rt { 
-            color: var(--ruby-color); 
-            font-size: 0.45em; 
-            font-weight: normal;
-        }
-
-        /* 標題加強 */
-        h1, h2 { color: var(--ruby-color); text-align: center; }
+        rt { color: var(--ruby-color); font-size: 0.45em; }
     </style>
 </head>
-<body id="mainBody">
+<body>
 
 <div class="controls">
     <div class="btn-group">
-        <button onclick="toggleDarkMode()">🌙 黑色模式開關</button>
-        <button onclick="adjustLineHeight(0.2)">➕ 加寬行距</button>
-        <button onclick="adjustLineHeight(-0.2)">➖ 縮短行距</button>
-        <button onclick="adjustFontSize(2)">🅰️ 放大字體</button>
-        <button onclick="adjustFontSize(-2)">🅰️ 縮小字體</button>
+        <button onclick="toggleDark()">🌙 黑色模式</button>
+        <button onclick="adjLH(0.2)">➕ 行距</button>
+        <button onclick="adjLH(-0.2)">➖ 行距</button>
+        <button onclick="adjFS(2)">🅰️ 放大</button>
+        <button onclick="adjFS(-2)">🅰️ 縮小</button>
     </div>
-
     <div class="btn-group">
-        <button onclick="loadFile('妙法蓮華經卷第一.md', this)" class="active">卷一</button>
-        <button onclick="loadFile('妙法蓮華經卷第二.md', this)">卷二</button>
-        <button onclick="loadFile('妙法蓮華經卷第三.md', this)">卷三</button>
-        <button onclick="loadFile('妙法蓮華經卷第四.md', this)">卷四</button>
-        <button onclick="loadFile('妙法蓮華經卷第五.md', this)">卷五</button>
-        <button onclick="loadFile('妙法蓮華經卷第六.md', this)">卷六</button>
-        <button onclick="loadFile('妙法蓮華經卷第七.md', this)">卷七</button>
+        <button onclick="load('妙法蓮華經卷第一.md', this)" class="active">卷一</button>
+        <button onclick="load('妙法蓮華經卷第二.md', this)">卷二</button>
+        <button onclick="load('妙法蓮華經卷第三.md', this)">卷三</button>
+        <button onclick="load('妙法蓮華經卷第四.md', this)">卷四</button>
+        <button onclick="load('妙法蓮華經卷第五.md', this)">卷五</button>
+        <button onclick="load('妙法蓮華經卷第六.md', this)">卷六</button>
+        <button onclick="load('妙法蓮華經卷第七.md', this)">卷七</button>
     </div>
 </div>
 
-<div id="content">正在開卷...</div>
+<div id="content">載入經文中...</div>
 
 <script>
-    let currentLineHeight = 2.2;
-    let currentFontSize = 22;
+    let lh = 2.2;
+    let fs = 22;
 
-    // 切換深色模式
-    function toggleDarkMode() {
-        document.body.classList.toggle('dark-mode');
-    }
+    function toggleDark() { document.body.classList.toggle('dark-mode'); }
+    function adjLH(v) { lh += v; document.body.style.setProperty('--line-height', lh); }
+    function adjFS(v) { fs += v; document.body.style.setProperty('--font-size', fs + 'px'); }
 
-    // 調整行距
-    function adjustLineHeight(delta) {
-        currentLineHeight += delta;
-        document.body.style.setProperty('--line-height', currentLineHeight);
-    }
-
-    // 調整字體大小
-    function adjustFontSize(delta) {
-        currentFontSize += delta;
-        document.body.style.setProperty('--font-size', currentFontSize + 'px');
-    }
-
-    // 核心功能：抓取 Markdown 檔案並轉換注音
-    async function loadFile(fileName, btn) {
-        const contentDiv = document.getElementById('content');
-        contentDiv.innerHTML = '正在恭請經文...';
-
-        // 更新按鈕樣式
-        if(btn) {
-            document.querySelectorAll('.btn-group button').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-        }
+    async function load(file, btn) {
+        const box = document.getElementById('content');
+        box.innerHTML = '正在開卷...';
+        
+        document.querySelectorAll('.btn-group button').forEach(b => b.classList.remove('active'));
+        if(btn) btn.classList.add('active');
 
         try {
-            const response = await fetch(fileName);
-            if (!response.ok) throw new Error('讀取失敗');
+            const res = await fetch(file);
+            let txt = await res.text();
             
-            let text = await response.text();
-
-            // 1. 清理 HTML 特殊字符
-            text = text.replace(/&nbsp;/g, " ");
-            text = text.replace(/<\/?[^>]+(>|$)/g, "");
-
-            // 2. 轉換注音：字(pinyin) -> <ruby>字<rt>pinyin</rt></ruby>
-            let formattedText = text.replace(/([一-龥])\(([^)]+)\)/g, '<ruby>$1<rt>$2</rt></ruby>');
-
-            // 3. 處理換行
-            formattedText = formattedText.replace(/\n/g, '<br>');
-
-            contentDiv.innerHTML = formattedText;
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        } catch (err) {
-            contentDiv.innerHTML = '讀取失敗，請確認檔名是否完全正確。錯誤：' + err.message;
+            // 轉換注音格式並清理標籤
+            let html = txt.replace(/&nbsp;/g, " ")
+                          .replace(/<\/?[^>]+(>|$)/g, "")
+                          .replace(/([一-龥])\(([^)]+)\)/g, '<ruby>$1<rt>$2</rt></ruby>')
+                          .replace(/\n/g, '<br>');
+            
+            box.innerHTML = html;
+            window.scrollTo(0,0);
+        } catch (e) {
+            box.innerHTML = '找不到檔案，請確認檔名是否正確。';
         }
     }
 
-    // 網頁開啟時自動載入第一卷
-    window.onload = () => {
-        loadFile('妙法蓮華經卷第一.md', document.querySelector('.active'));
-    };
+    // 初始載入
+    window.onload = () => load('妙法蓮華經卷第一.md', document.querySelector('.active'));
 </script>
 
 </body>
 </html>
-
-### 📋 您的成果清單：
-1.  **黑色模式**：點擊「🌙 黑色模式開關」，畫面會變成深灰色底、淡綠色字，這對 OLED 螢幕的手機（如 Snapdragon 865 機型）最省電且不傷眼。
-2.  **動態行距**：您可以自由按「➕」或「➖」來調整行高，不用再擔心標籤擋住視線。
-3.  **七卷齊全**：我已經根據您的檔名預設好了七個按鈕，點一下就切換一卷。
-4.  **字體調節**：額外加了放大縮小字體的功能，這對於 15 年後的視力需求也非常有幫助。
-
-**現在請將這段代碼覆蓋到 GitHub，然後打開網址看看成果。如果有任何一卷點了沒反應，通常是檔名差了一個空格或標點，請隨時告訴我！**
 
