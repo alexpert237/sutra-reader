@@ -12,13 +12,13 @@
             --nav-bg: #ffffff;
             --line-height: 2.2;
             --font-size: 22px;
+            --rt-display: block; /* 控制注音顯示 */
         }
 
-        /* 黑色模式 (深色主題) */
         body.dark-mode {
             --bg-color: #121212;
-            --text-color: #daffde; /* 淺綠色字，最適合長時間讀經 */
-            --ruby-color: #deff9a; /* 亮色注音 */
+            --text-color: #daffde;
+            --ruby-color: #deff9a;
             --nav-bg: #1a1a1a;
         }
 
@@ -33,13 +33,19 @@
             flex-direction: column;
             align-items: center;
             transition: 0.3s;
+            /* 預設開啟選取功能，但優化選取體驗 */
+            user-select: text;
+            -webkit-user-select: text;
         }
 
-        /* 固定在頂部的控制列 */
-        .controls {
+        .nav-wrapper {
             position: sticky;
             top: 0;
             width: 100%;
+            z-index: 1000;
+        }
+
+        .controls {
             background: var(--nav-bg);
             padding: 10px 0;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
@@ -47,7 +53,21 @@
             flex-direction: column;
             gap: 10px;
             align-items: center;
-            z-index: 100;
+            max-height: 500px;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+
+        .controls.collapsed { max-height: 0; padding: 0; }
+
+        .toggle-btn {
+            width: 100%;
+            background: #8e44ad;
+            color: white;
+            border: none;
+            padding: 8px;
+            cursor: pointer;
+            font-size: 14px;
         }
 
         .btn-group {
@@ -55,59 +75,67 @@
             gap: 5px;
             flex-wrap: wrap;
             justify-content: center;
+            padding: 0 10px;
         }
 
         button {
-            padding: 6px 12px;
+            padding: 6px 10px;
             cursor: pointer;
             border: 1px solid #ccc;
             background: #fff;
             border-radius: 4px;
         }
 
-        body.dark-mode button {
-            background: #333;
-            color: #fff;
-            border-color: #555;
-        }
-
-        button.active {
-            background: #8e44ad !important;
-            color: #fff !important;
-        }
+        body.dark-mode button { background: #333; color: #fff; border-color: #555; }
+        button.active { background: #8e44ad !important; color: #fff !important; }
 
         #content {
             max-width: 800px;
             width: 90%;
-            padding: 30px 10px;
+            padding: 20px 10px;
+            word-break: break-all;
         }
 
         ruby { ruby-align: center; }
-        rt { color: var(--ruby-color); font-size: 0.45em; }
+        /* 關鍵：透過 CSS 變數控制注音是否消失 */
+        rt { 
+            display: var(--rt-display);
+            color: var(--ruby-color); 
+            font-size: 0.45em; 
+        }
+
+        /* 當切換到複製模式時的樣式 */
+        body.copy-mode rt {
+            display: none;
+        }
     </style>
 </head>
 <body>
 
-<div class="controls">
-    <div class="btn-group">
-        <button onclick="toggleDark()">🌙 黑色模式</button>
-        <button onclick="adjLH(0.2)">➕ 行距</button>
-        <button onclick="adjLH(-0.2)">➖ 行距</button>
-        <button onclick="adjFS(2)">🅰️ 放大</button>
-        <button onclick="adjFS(-2)">🅰️ 縮小</button>
+<div class="nav-wrapper">
+    <div id="controlPanel" class="controls">
+        <div class="btn-group">
+            <button onclick="toggleDark()">🌙 黑色模式</button>
+            <button onclick="toggleCopyMode(this)">📋 開啟複製模式</button>
+            <button onclick="adjLH(0.2)">➕ 行距</button>
+            <button onclick="adjLH(-0.2)">➖ 行距</button>
+            <button onclick="adjFS(2)">🅰️ 放大</button>
+            <button onclick="adjFS(-2)">🅰️ 縮小</button>
+        </div>
+        <div class="btn-group">
+            <button onclick="load('妙法蓮華經卷第一.md', this)" class="active">卷一</button>
+            <button onclick="load('妙法蓮華經卷第二.md', this)">卷二</button>
+            <button onclick="load('妙法蓮華經卷第三.md', this)">卷三</button>
+            <button onclick="load('妙法蓮華經卷第四.md', this)">卷四</button>
+            <button onclick="load('妙法蓮華經卷第五.md', this)">卷五</button>
+            <button onclick="load('妙法蓮華經卷第六.md', this)">卷六</button>
+            <button onclick="load('妙法蓮華經卷第七.md', this)">卷七</button>
+        </div>
     </div>
-    <div class="btn-group">
-        <button onclick="load('妙法蓮華經卷第一.md', this)" class="active">卷一</button>
-        <button onclick="load('妙法蓮華經卷第二.md', this)">卷二</button>
-        <button onclick="load('妙法蓮華經卷第三.md', this)">卷三</button>
-        <button onclick="load('妙法蓮華經卷第四.md', this)">卷四</button>
-        <button onclick="load('妙法蓮華經卷第五.md', this)">卷五</button>
-        <button onclick="load('妙法蓮華經卷第六.md', this)">卷六</button>
-        <button onclick="load('妙法蓮華經卷第七.md', this)">卷七</button>
-    </div>
+    <button class="toggle-btn" onclick="toggleMenu()">🔼 隱藏/顯示選單 🔽</button>
 </div>
 
-<div id="content">載入經文中...</div>
+<div id="content">載入中...</div>
 
 <script>
     let lh = 2.2;
@@ -116,35 +144,45 @@
     function toggleDark() { document.body.classList.toggle('dark-mode'); }
     function adjLH(v) { lh += v; document.body.style.setProperty('--line-height', lh); }
     function adjFS(v) { fs += v; document.body.style.setProperty('--font-size', fs + 'px'); }
+    function toggleMenu() { document.getElementById('controlPanel').classList.toggle('collapsed'); }
+
+    // 切換複製模式的函式
+    function toggleCopyMode(btn) {
+        const isCopyMode = document.body.classList.toggle('copy-mode');
+        if (isCopyMode) {
+            btn.innerHTML = "✅ 複製模式 (已隱藏注音)";
+            btn.style.background = "#27ae60";
+            btn.style.color = "#fff";
+        } else {
+            btn.innerHTML = "📋 開啟複製模式";
+            btn.style.background = "";
+            btn.style.color = "";
+        }
+    }
 
     async function load(file, btn) {
         const box = document.getElementById('content');
         box.innerHTML = '正在開卷...';
-        
-        document.querySelectorAll('.btn-group button').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.btn-group button').forEach(b => {
+            if(b.innerText.includes("卷")) b.classList.remove('active');
+        });
         if(btn) btn.classList.add('active');
 
         try {
             const res = await fetch(file);
             let txt = await res.text();
-            
-            // 轉換注音格式並清理標籤
             let html = txt.replace(/&nbsp;/g, " ")
                           .replace(/<\/?[^>]+(>|$)/g, "")
                           .replace(/([一-龥])\(([^)]+)\)/g, '<ruby>$1<rt>$2</rt></ruby>')
                           .replace(/\n/g, '<br>');
-            
             box.innerHTML = html;
             window.scrollTo(0,0);
         } catch (e) {
-            box.innerHTML = '找不到檔案，請確認檔名是否正確。';
+            box.innerHTML = '找不到檔案。';
         }
     }
-
-    // 初始載入
     window.onload = () => load('妙法蓮華經卷第一.md', document.querySelector('.active'));
 </script>
 
 </body>
 </html>
-
