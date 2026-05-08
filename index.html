@@ -1,1 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>經文隨身讀</title>
+    <style>
+        :root { --bg: #000000; --text: #d1d1d1; --accent: #2196F3; }
+        body { background: var(--bg); color: var(--text); font-family: "Noto Serif TC", serif; padding: 20px; line-height: 2.8; margin: 0; }
+        .container { max-width: 800px; margin: 0 auto; }
+        #content { font-size: 26px; text-align: justify; word-break: break-all; }
+        /* 注音標註樣式 */
+        ruby { ruby-position: over; }
+        rt { font-size: 0.45em; color: var(--accent); font-family: sans-serif; letter-spacing: 1px; }
+        /* 載入中動畫 */
+        .loading { text-align: center; margin-top: 50px; color: #666; font-family: sans-serif; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="content"><div class="loading">正在開啟經文...</div></div>
+</div>
+
+<script>
+    // 拼音注音對照表
+    const t={'ā':['a',1],'á':['a',2],'ǎ':['a',3],'à':['a',4],'ē':['e',1],'é':['e',2],'ě':['e',3],'è':['e',4],'ī':['i',1],'í':['i',2],'ǐ':['i',3],'ì':['i',4],'ō':['o',1],'ó':['o',2],'ǒ':['o',3],'ò':['o',4],'ū':['u',1],'ú':['u',2],'ǔ':['u',3],'ù':['u',4],'ǖ':['v',1],'ǘ':['v',2],'ǚ':['v',3],'ǜ':['v',4]};
+    const m=["","","ˊ","ˇ","ˋ"];
+    const d={"miao":"ㄇㄧㄠ","fa":"ㄈㄚ","lian":"ㄌㄧㄢ","hua":"ㄏㄨㄚ","jing":"ㄐㄧㄥ","xu":"ㄒㄩ","pin":"ㄆㄧㄣ","di":"ㄉㄧ","yi":"ㄧ","ru":"ㄖㄨ","shi":"ㄕ","wo":"ㄨㄛ","wen":"ㄨㄣ"};
+
+    function p2z(p){
+        let s=p.toLowerCase(), o=0;
+        for(let c in t){ if(s.includes(c)){ o=t[c][1]; s=s.replace(c,t[c][0]); } }
+        return (d[s]||s)+(m[o]||"");
+    }
+
+    async function loadSutra() {
+        try {
+            // 抓取同目錄下的經文檔
+            const response = await fetch('sutra.txt');
+            if (!response.ok) throw new Error();
+            const text = await response.text();
+            
+            const regex = /([\u4E00-\u9FFF])\(([^)]+)\)/g;
+            const container = document.getElementById('content');
+            
+            // 處理換行並渲染
+            container.innerHTML = text.split('\n').map(line => {
+                if(!line.trim()) return '<div style="height:1em"></div>';
+                return `<div>${line.replace(regex, (match, char, pinyin) => {
+                    return `<ruby>${char}<rt>${p2z(pinyin)}</rt></ruby>`;
+                })}</div>`;
+            }).join('');
+
+        } catch (err) {
+            document.getElementById('content').innerHTML = "無法載入經文，請確認 sutra.txt 是否正確上傳。";
+        }
+    }
+
+    loadSutra();
+</script>
+</body>
+</html>
 
