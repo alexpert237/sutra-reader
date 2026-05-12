@@ -3,188 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>妙法蓮華經 - 數位閱讀器</title>
+    <title>妙法蓮華經數位版</title>
     <style>
-        :root {
-            --bg-color: #f9f7f2;
-            --text-color: #333;
-            --ruby-color: #2980b9;
-            --nav-bg: #ffffff;
-            --line-height: 2.2;
-            --font-size: 22px;
-        }
-
-        body.dark-mode {
-            --bg-color: #121212;
-            --text-color: #daffde;
-            --ruby-color: #deff9a;
-            --nav-bg: #1a1a1a;
-        }
-
         body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            line-height: var(--line-height);
-            font-size: var(--font-size);
-            /* 恢復系統字體，不再指定新細明體 */
-            font-family: system-ui, -apple-system, sans-serif; 
-            margin: 0;
+            background-color: #fdfaf2; /* 宣紙色 */
             display: flex;
             flex-direction: column;
             align-items: center;
-            transition: background-color 0.3s;
-            user-select: text;
-            -webkit-user-select: text;
-        }
-
-        /* 導覽列 */
-        .nav-wrapper {
-            position: sticky;
-            top: 0;
-            width: 100%;
-            z-index: 1000;
-        }
-
-        .controls {
-            background: var(--nav-bg);
-            padding: 10px 0;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            align-items: center;
-            max-height: 500px;
-            overflow: hidden;
-            transition: max-height 0.3s ease-out;
-        }
-
-        .controls.collapsed { max-height: 0; padding: 0; border: none; }
-
-        .toggle-btn {
-            width: 100%;
-            background: #8e44ad;
-            color: white;
-            border: none;
-            padding: 8px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .btn-group {
-            display: flex;
-            gap: 5px;
-            flex-wrap: wrap;
             justify-content: center;
-            padding: 0 10px;
+            height: 100vh;
+            margin: 0;
+            font-family: "Constantia", serif; /* 英文用你的襯線體 */
         }
-
-        button {
-            padding: 6px 10px;
-            cursor: pointer;
-            border: 1px solid #ccc;
-            background: #fff;
-            border-radius: 4px;
+        h1 { color: #5d3d21; font-size: 2.5em; margin-bottom: 50px; }
+        .menu { display: flex; gap: 20px; }
+        .card {
+            padding: 30px;
+            border: 1px solid #d4c5af;
+            background: white;
+            text-decoration: none;
+            color: #333;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: 0.3s;
+            text-align: center;
+            width: 150px;
         }
-
-        body.dark-mode button { background: #333; color: #fff; border-color: #555; }
-        button.active { background: #8e44ad !important; color: #fff !important; }
-
-        /* 經文區塊優化 */
-        #content {
-            max-width: 800px;
-            width: 90%;
-            padding: 20px 10px;
-            word-break: break-all;
-            /* 減少選取時的渲染 Lag */
-            contain: content; 
-        }
-
-        /* 注音位置修正 */
-        ruby { 
-            ruby-align: center; 
-            ruby-position: over; /* 強制注音在上面 */
-        }
-        
-        rt { 
-            color: var(--ruby-color); 
-            font-size: 0.45em;
-            line-height: 1;
-            /* 避免注音影響行高計算，減少 Lag */
-            user-select: none; 
-        }
-
-        /* 複製模式：隱藏注音 */
-        body.copy-mode rt { display: none; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 6px 12px rgba(0,0,0,0.1); }
+        .status { font-size: 0.8em; color: #999; display: block; margin-top: 10px; }
     </style>
 </head>
 <body>
-
-<div class="nav-wrapper">
-    <div id="controlPanel" class="controls">
-        <div class="btn-group">
-            <button onclick="toggleDark()">🌙 黑色模式</button>
-            <button id="copyBtn" onclick="toggleCopyMode()">📋 開啟複製模式</button>
-            <button onclick="adjLH(0.2)">➕ 行距</button>
-            <button onclick="adjLH(-0.2)">➖ 行距</button>
-            <button onclick="adjFS(2)">🅰️ 放大</button>
-            <button onclick="adjFS(-2)">🅰️ 縮小</button>
-        </div>
-        <div class="btn-group">
-            <button onclick="load('妙法蓮華經卷第一.md', this)" class="active">卷一</button>
-            <button onclick="load('妙法蓮華經卷第二.md', this)">卷二</button>
-            <button onclick="load('妙法蓮華經卷第三.md', this)">卷三</button>
-            <button onclick="load('妙法蓮華經卷第四.md', this)">卷四</button>
-            <button onclick="load('妙法蓮華經卷第五.md', this)">卷五</button>
-            <button onclick="load('妙法蓮華經卷第六.md', this)">卷六</button>
-            <button onclick="load('妙法蓮華經卷第七.md', this)">卷七</button>
-        </div>
+    <h1>妙法蓮華經</h1>
+    <div class="menu">
+        <a href="pinyin_version.html" class="card">
+            <h3>拼音版</h3>
+            <p>七卷法華經</p>
+        </a>
+        <a href="zhuyin_version.html" class="card">
+            <h3>注音版</h3>
+            <p>芫荽體</p>
+            <span class="status">正在校對中...</span>
+        </a>
     </div>
-    <button class="toggle-btn" onclick="toggleMenu()">🔼 隱藏/顯示選單 🔽</button>
-</div>
-
-<div id="content">載入中...</div>
-
-<script>
-    let lh = 2.2;
-    let fs = 22;
-
-    function toggleDark() { document.body.classList.toggle('dark-mode'); }
-    function adjLH(v) { lh += v; document.body.style.setProperty('--line-height', lh); }
-    function adjFS(v) { fs += v; document.body.style.setProperty('--font-size', fs + 'px'); }
-    function toggleMenu() { document.getElementById('controlPanel').classList.toggle('collapsed'); }
-
-    function toggleCopyMode() {
-        const btn = document.getElementById('copyBtn');
-        const isCopy = document.body.classList.toggle('copy-mode');
-        btn.innerHTML = isCopy ? "✅ 退出複製模式" : "📋 開啟複製模式";
-        btn.style.background = isCopy ? "#27ae60" : "";
-        btn.style.color = isCopy ? "#fff" : "";
-    }
-
-    async function load(file, btn) {
-        const box = document.getElementById('content');
-        box.innerHTML = '正在開卷...';
-        document.querySelectorAll('.btn-group button').forEach(b => {
-            if(b.innerText.includes("卷")) b.classList.remove('active');
-        });
-        if(btn) btn.classList.add('active');
-
-        try {
-            const res = await fetch(file);
-            let txt = await res.text();
-            let html = txt.replace(/&nbsp;/g, " ")
-                          .replace(/<\/?[^>]+(>|$)/g, "")
-                          .replace(/([一-龥])\(([^)]+)\)/g, '<ruby>$1<rt>$2</rt></ruby>')
-                          .replace(/\n/g, '<br>');
-            box.innerHTML = html;
-            window.scrollTo(0,0);
-        } catch (e) {
-            box.innerHTML = '找不到檔案。';
-        }
-    }
-    window.onload = () => load('妙法蓮華經卷第一.md', document.querySelector('.active'));
-</script>
-
 </body>
 </html>
-
