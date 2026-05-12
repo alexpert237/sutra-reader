@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>注音版 - 妙法蓮華經 (芫荽體)</title>
+    <style>
+        /* 載入字體 */
+        @font-face {
+            font-family: 'Iansui';
+            src: url('fonts/Iansui-Regular.woff2') format('woff2');
+            font-display: swap;
+        }
+
+        body {
+            background-color: #fdfaf2; /* 宣紙感背景 */
+            color: #2c2c2c;
+            font-family: "Constantia", "Georgia", serif; /* UI 預設用襯線體 */
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 控制列 */
+        .toolbar {
+            position: sticky;
+            top: 10px;
+            background: white;
+            padding: 15px 25px;
+            border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        button, select {
+            padding: 8px 15px;
+            border-radius: 20px;
+            border: 1px solid #d4c5af;
+            background: white;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        /* 經文顯示區域 */
+        #sutra-content {
+            font-family: 'Iansui', serif;
+            font-variant-ligatures: contextual; /* 芫荽體注音核心設定 */
+            font-size: 24px;
+            line-height: 2.8; /* 留給注音空間 */
+            max-width: 850px;
+            width: 100%;
+            white-space: pre-wrap; /* 保留空格與換行 */
+            padding: 40px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+        }
+
+        .loading { color: #999; font-style: italic; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <div class="toolbar">
+        <a href="index.html" style="text-decoration:none; line-height:35px;">🏠</a>
+        <select id="volSelect" onchange="loadVolume()">
+            <option value="1">第一卷</option>
+            <option value="2">第二卷</option>
+            <option value="3">第三卷</option>
+            <option value="4">第四卷</option>
+            <option value="5">第五卷</option>
+            <option value="6">第六卷</option>
+            <option value="7">第七卷</option>
+        </select>
+        <button onclick="adjustSize(2)">A+</button>
+        <button onclick="adjustSize(-2)">A-</button>
+    </div>
+
+    <div id="sutra-content">請選擇卷數開始校對...</div>
+
+    <script>
+        let currentSize = 24;
+
+        async function loadVolume() {
+            const vol = document.getElementById('volSelect').value;
+            const contentDiv = document.getElementById('sutra-content');
+            
+            contentDiv.innerHTML = '<p class="loading">正在載入經文...</p>';
+            
+            try {
+                // 請確保路徑正確：data/zh_vol1.txt
+                const response = await fetch(`data/zh_vol${vol}.txt`);
+                if (!response.ok) throw new Error("找不到檔案");
+                const text = await response.text();
+                contentDiv.innerText = text;
+                window.scrollTo(0, 0);
+            } catch (err) {
+                contentDiv.innerHTML = `<p style="color:red">載入失敗: ${err.message}<br>請確認 data/zh_vol${vol}.txt 是否存在。</p>`;
+            }
+        }
+
+        function adjustSize(delta) {
+            currentSize += delta;
+            document.getElementById('sutra-content').style.fontSize = currentSize + 'px';
+        }
+
+        // 頁面開啟自動載入第一卷
+        window.onload = loadVolume;
+    </script>
+</body>
+</html>
+
+這份 HTML 會像大門一樣，自動去讀取您的資料檔案。您只需要專心在 Word 裡把那 7 萬字分卷存成 `zh_vol1.txt` 到 `zh_vol7.txt` 即可。
+
+您的注音版法華經 App 已經初具規模了！如果有任何排版上的微調需求（例如希望字更靠中間，或是加入背景音樂），隨時告訴我！
