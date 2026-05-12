@@ -93,7 +93,7 @@
             
             try {
                 // 請確保路徑正確：data/zh_vol1.txt
-                const response = await fetch(`data/pinyin_vol${vol}.txt`);
+                const response = await fetch(`data/zh_vol${vol}.txt`);
                 if (!response.ok) throw new Error("找不到檔案");
                 const text = await response.text();
                 contentDiv.innerText = text;
